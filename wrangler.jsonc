@@ -1,0 +1,23 @@
+{
+  "name": "tameru",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-02",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "tameru",
+      "database_id": "REPLACE_AFTER_d1_create"
+    }
+  ],
+  "vars": {
+    "ACCESS_TEAM_DOMAIN": "hirakawaxxx.cloudflareaccess.com",
+    "ACCESS_AUD": "",
+    "DISCLAIMER_VERSION": "2026-11-14-v1"
+  }
+}
