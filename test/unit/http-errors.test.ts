@@ -50,6 +50,16 @@ describe('HTTP error policy (app)', () => {
     expect(await res.json()).toEqual(errorJson(ERROR_CODES.unauthorized))
   })
 
+  it('sets Cache-Control: no-store on GET /api/me', async () => {
+    const res = await app.request(
+      'http://localhost/api/me',
+      { headers: authHeaders(owner) },
+      env,
+    )
+    expect(res.status).toBe(200)
+    expect(res.headers.get('Cache-Control')).toBe('no-store')
+  })
+
   it('403 when disclaimer not accepted', async () => {
     const fresh = `http-err-nodec-${Date.now()}@example.com`
     const res = await app.request(
