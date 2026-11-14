@@ -8,6 +8,17 @@
 
 設計は `docs/superpowers/specs/`、実装計画は `docs/superpowers/plans/` に置きます。
 
+## design-kit（Soft Mint）
+
+`design/` にアプリ名・モチーフを置き、隣の `design-kit` で `public/` を生成します。
+
+```bash
+node ../design-kit/bin/design-kit.mjs all
+node ../design-kit/bin/design-kit.mjs check
+```
+
+`tokens.css` / `components.css` / `fonts.css` は手編集せず `sync` で揃えます。
+
 ## 開発メモ
 
 - ローカル: `wrangler dev` とローカル D1
