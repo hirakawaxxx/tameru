@@ -20,7 +20,14 @@ export async function ensureUser(db: D1Database, owner: string): Promise<UserRow
     .bind(owner)
     .first<UserRow>()
   if (existing) return existing
-  await db.prepare('INSERT INTO users (owner) VALUES (?)').bind(owner).run()
+  await db.prepare('INSERT OR IGNORE INTO users (owner) VALUES (?)').bind(owner).run()
+  const after = await db
+    .prepare(
+      'SELECT owner, disclaimer_version, disclaimer_accepted_at FROM users WHERE owner = ?',
+    )
+    .bind(owner)
+    .first<UserRow>()
+  if (after) return after
   return {
     owner,
     disclaimer_version: '0',
