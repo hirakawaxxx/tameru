@@ -113,8 +113,7 @@ body {
   color: var(--color-primary-strong);
 }
 
-.viewer-doc pre.doc-body {
-  white-space: pre-wrap;
+.viewer-doc div.doc-body {
   word-break: break-word;
   padding: var(--space-4);
   border-radius: var(--radius-lg);

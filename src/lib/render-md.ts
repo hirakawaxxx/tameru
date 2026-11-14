@@ -13,10 +13,11 @@ marked.use({
     html({ text }) {
       return escapeHtml(text)
     },
-    link({ href, text }) {
+    link({ href, text, title }) {
       const safeHref =
         href?.startsWith('/d/') || href?.startsWith('/disclaimer') ? href : '#'
-      return `<a href="${safeHref}">${text}</a>`
+      const titleAttr = title ? ` title="${escapeHtml(title)}"` : ''
+      return `<a href="${safeHref}"${titleAttr}>${escapeHtml(text ?? '')}</a>`
     },
   },
 })

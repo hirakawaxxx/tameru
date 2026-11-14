@@ -21,4 +21,13 @@ describe('renderMarkdownToHtml', () => {
     const html = renderMarkdownToHtml('[免責](/disclaimer)')
     expect(html).toContain('href="/disclaimer"')
   })
+
+  it('escapes HTML in link label text', () => {
+    const html = renderMarkdownToHtml(
+      '[<img onerror=alert(1) src=x>](/d/01JCAAAAAAAAAAAAAAAAAAAAA1)',
+    )
+    expect(html).not.toMatch(/<img\b/i)
+    expect(html).toContain('&lt;img')
+    expect(html).toContain('onerror')
+  })
 })
