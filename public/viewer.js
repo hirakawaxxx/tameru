@@ -1,3 +1,5 @@
+import { canEnableDisclaimerAccept } from '/disclaimer-scroll.js'
+
 const VIEW_KEY = 'tameru-view'
 
 function preferredView() {
@@ -26,20 +28,69 @@ function setView(view) {
   if (view === 'graph') loadGraph()
 }
 
-async function acceptDisclaimer() {
-  const res = await fetch('/api/me/disclaimer', { method: 'POST' })
-  if (!res.ok) return
-  location.reload()
+function syncDisclaimerAcceptButton(scrollEl, acceptBtn) {
+  if (!scrollEl || !acceptBtn) return
+  acceptBtn.disabled = !canEnableDisclaimerAccept(scrollEl)
+}
+
+async function acceptDisclaimer({ statusEl, acceptBtn, scrollEl } = {}) {
+  if (statusEl) {
+    statusEl.hidden = true
+    statusEl.textContent = ''
+  }
+  if (acceptBtn) acceptBtn.disabled = true
+  try {
+    const res = await fetch('/api/me/disclaimer', { method: 'POST' })
+    if (!res.ok) {
+      let msg = '同意の記録に失敗しました。しばらくしてから再度お試しください。'
+      try {
+        const body = await res.json()
+        if (body?.error) msg = `${msg}（${body.error}）`
+      } catch {
+        /* ignore */
+      }
+      if (statusEl) {
+        statusEl.textContent = msg
+        statusEl.hidden = false
+      }
+      if (acceptBtn && scrollEl) syncDisclaimerAcceptButton(scrollEl, acceptBtn)
+      return
+    }
+    location.reload()
+  } catch {
+    if (statusEl) {
+      statusEl.textContent = 'ネットワークエラーで同意できませんでした。'
+      statusEl.hidden = false
+    }
+    if (acceptBtn && scrollEl) syncDisclaimerAcceptButton(scrollEl, acceptBtn)
+  }
 }
 
 async function initDisclaimerGate() {
   const gate = document.getElementById('disclaimer-gate')
   const page = document.body.dataset.page
+  const scrollEl = document.getElementById('disclaimer-scroll-body')
   const acceptBtn = document.getElementById('disclaimer-accept')
   const acceptPage = document.getElementById('disclaimer-accept-page')
+  const statusGate = document.getElementById('disclaimer-accept-status')
+  const statusPage = document.getElementById('disclaimer-accept-page-status')
 
-  acceptBtn?.addEventListener('click', () => void acceptDisclaimer())
-  acceptPage?.addEventListener('click', () => void acceptDisclaimer())
+  if (scrollEl) {
+    const syncAll = () => {
+      syncDisclaimerAcceptButton(scrollEl, acceptBtn)
+      syncDisclaimerAcceptButton(scrollEl, acceptPage)
+    }
+    scrollEl.addEventListener('scroll', syncAll, { passive: true })
+    window.addEventListener('resize', syncAll, { passive: true })
+    requestAnimationFrame(syncAll)
+  }
+
+  acceptBtn?.addEventListener('click', () =>
+    void acceptDisclaimer({ statusEl: statusGate, acceptBtn, scrollEl }),
+  )
+  acceptPage?.addEventListener('click', () =>
+    void acceptDisclaimer({ statusEl: statusPage, acceptBtn: acceptPage, scrollEl }),
+  )
 
   if (page === 'disclaimer') return
 
@@ -49,6 +100,12 @@ async function initDisclaimerGate() {
     const me = await res.json()
     if (me.disclaimer_accepted) return
     if (gate) gate.hidden = false
+    if (scrollEl) {
+      requestAnimationFrame(() => {
+        syncDisclaimerAcceptButton(scrollEl, acceptBtn)
+        syncDisclaimerAcceptButton(scrollEl, acceptPage)
+      })
+    }
   } catch {
     /* ignore */
   }

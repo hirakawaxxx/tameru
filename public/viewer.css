@@ -121,11 +121,34 @@ body {
   font: var(--font-body);
 }
 
-.viewer-disclaimer ol {
+.viewer-disclaimer-scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  background: var(--color-surface-raised);
+}
+
+.viewer-disclaimer-scroll--gate {
+  max-height: min(50vh, 20rem);
+}
+
+.viewer-disclaimer-scroll ol {
   padding-left: var(--space-6);
+  margin: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+.viewer-disclaimer__status {
+  color: var(--color-danger, #b42318);
+  margin: 0;
+}
+
+.viewer-disclaimer__status[hidden] {
+  display: none;
 }
 
 .viewer-disclaimer__actions {
@@ -148,7 +171,8 @@ body {
 }
 
 .viewer-gate__panel {
-  max-width: 24rem;
+  width: min(100%, 28rem);
+  max-height: min(92vh, 36rem);
   padding: var(--space-6);
   display: flex;
   flex-direction: column;

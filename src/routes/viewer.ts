@@ -2,14 +2,7 @@ import { Hono, type Context } from 'hono'
 import type { Env } from '../env'
 import type { AuthVariables } from '../middleware/auth'
 import { requireAuth } from '../middleware/auth'
-
-const DISCLAIMER_ITEMS = [
-  '個人開発であり、予告なく終了・データ消去がありうる',
-  '目安として GitHub の Star を歓迎（任意）',
-  '機密性・完全性・可用性を保証しない。機微情報を置かない',
-  'バックアップ・復旧・SLA なし',
-  '違法コンテンツ・他者権利侵害の禁止',
-] as const
+import { renderDisclaimerScrollRegion } from '../lib/disclaimer'
 
 function escapeHtml(text: string): string {
   return text
@@ -63,11 +56,12 @@ function renderShell(options: {
   </div>
   <div id="disclaimer-gate" class="viewer-gate" hidden>
     <div class="viewer-gate__panel ui-card">
-      <h2 class="ui-text-heading">はじめに</h2>
-      <p class="ui-text-body">tameru を使う前に免責事項への同意が必要です。</p>
+      <h2 class="ui-text-heading">免責事項</h2>
+      <p class="ui-text-body">tameru を使う前に、以下の免責事項を最後までお読みのうえ同意してください。</p>
+      ${renderDisclaimerScrollRegion('gate')}
+      <p id="disclaimer-accept-status" class="viewer-disclaimer__status ui-text-caption" role="alert" hidden></p>
       <div class="viewer-gate__actions">
-        <a href="/disclaimer" class="ui-button ui-button--secondary">免責を読む</a>
-        <button type="button" id="disclaimer-accept" class="ui-button ui-button--primary">同意して続ける</button>
+        <button type="button" id="disclaimer-accept" class="ui-button ui-button--primary" disabled>同意して続ける</button>
       </div>
     </div>
   </div>
@@ -77,15 +71,13 @@ function renderShell(options: {
 }
 
 function disclaimerMain(): string {
-  const items = DISCLAIMER_ITEMS.map((t) => `<li>${escapeHtml(t)}</li>`).join('\n    ')
   return `<article class="viewer-disclaimer">
   <h1 class="ui-text-display">免責事項</h1>
-  <ol class="ui-text-body">
-    ${items}
-  </ol>
+  ${renderDisclaimerScrollRegion()}
+  <p id="disclaimer-accept-page-status" class="viewer-disclaimer__status ui-text-caption" role="alert" hidden></p>
   <p class="viewer-disclaimer__actions">
     <a href="/" class="ui-button ui-button--secondary">ホームへ</a>
-    <button type="button" id="disclaimer-accept-page" class="ui-button ui-button--primary">同意して続ける</button>
+    <button type="button" id="disclaimer-accept-page" class="ui-button ui-button--primary" disabled>同意して続ける</button>
   </p>
 </article>`
 }
