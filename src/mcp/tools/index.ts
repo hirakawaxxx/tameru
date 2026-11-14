@@ -8,6 +8,7 @@ import {
   type DocRow,
 } from '../../db/docs'
 import { BROWSE_MAX } from '../../lib/constants'
+import { registerBrowseTool } from './browse'
 
 export const MCP_TOOL_NAMES = [
   'upsert_doc',
@@ -71,22 +72,7 @@ export function registerTools(server: McpServer, ctx: McpToolContext): void {
     },
   )
 
-  server.registerTool(
-    'browse',
-    {
-      description: 'Virtual folders under /, /recent/, /kind/, /tags/ (Task 11).',
-      inputSchema: {
-        path: z.string().describe('Virtual browse path, e.g. / or /tags/design/'),
-      },
-    },
-    async ({ path }) => {
-      return textJson({
-        error: 'browse_not_implemented',
-        path,
-        hint: 'Virtual browse paths ship in a follow-up task.',
-      })
-    },
-  )
+  registerBrowseTool(server, ctx)
 
   server.registerTool(
     'search',
