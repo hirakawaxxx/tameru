@@ -60,6 +60,89 @@ export async function searchDocs(
   return result.results ?? []
 }
 
+export type DocSummary = {
+  id: string
+  title: string
+  description: string
+  kind: string
+  tags: string[]
+  updated_at: string
+}
+
+export function docSummaryFromRow(row: DocRow): DocSummary {
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    kind: row.kind,
+    tags: JSON.parse(row.tags_json) as string[],
+    updated_at: row.updated_at,
+  }
+}
+
+export async function listBacklinks(
+  db: D1Database,
+  owner: string,
+  id: string,
+  limit: number = BROWSE_MAX,
+): Promise<{ id: string; title: string }[]> {
+  const pattern = `%"${id}"%`
+  const result = await db
+    .prepare(
+      `SELECT id, title FROM docs
+       WHERE owner = ? AND deleted_at IS NULL AND links_json LIKE ?
+       LIMIT ?`,
+    )
+    .bind(owner, pattern, limit)
+    .all<{ id: string; title: string }>()
+  return result.results ?? []
+}
+
+export async function listDocsForOwner(
+  db: D1Database,
+  owner: string,
+  opts: { kind?: string; tag?: string; limit?: number; offset?: number } = {},
+): Promise<DocSummary[]> {
+  const limit = Math.min(Math.max(opts.limit ?? BROWSE_MAX, 1), BROWSE_MAX)
+  const offset = Math.max(opts.offset ?? 0, 0)
+  if (opts.tag) {
+    const result = await db
+      .prepare(
+        `SELECT d.id, d.title, d.description, d.kind, d.tags_json, d.updated_at
+         FROM doc_tags t
+         JOIN docs d ON d.id = t.doc_id
+         WHERE t.owner = ? AND t.tag = ? AND d.deleted_at IS NULL
+         ORDER BY d.updated_at DESC
+         LIMIT ? OFFSET ?`,
+      )
+      .bind(owner, opts.tag.toLowerCase(), limit, offset)
+      .all<DocRow>()
+    return (result.results ?? []).map(docSummaryFromRow)
+  }
+  if (opts.kind) {
+    const result = await db
+      .prepare(
+        `SELECT id, title, description, kind, tags_json, updated_at FROM docs
+         WHERE owner = ? AND deleted_at IS NULL AND kind = ?
+         ORDER BY updated_at DESC
+         LIMIT ? OFFSET ?`,
+      )
+      .bind(owner, opts.kind, limit, offset)
+      .all<DocRow>()
+    return (result.results ?? []).map(docSummaryFromRow)
+  }
+  const result = await db
+    .prepare(
+      `SELECT id, title, description, kind, tags_json, updated_at FROM docs
+       WHERE owner = ? AND deleted_at IS NULL
+       ORDER BY updated_at DESC
+       LIMIT ? OFFSET ?`,
+    )
+    .bind(owner, limit, offset)
+    .all<DocRow>()
+  return (result.results ?? []).map(docSummaryFromRow)
+}
+
 export async function getDocForOwner(
   db: D1Database,
   owner: string,
