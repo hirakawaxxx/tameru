@@ -170,6 +170,11 @@ body {
   backdrop-filter: blur(4px);
 }
 
+/* Author `display: flex` must not override the HTML hidden attribute. */
+.viewer-gate[hidden] {
+  display: none !important;
+}
+
 .viewer-gate__panel {
   width: min(100%, 28rem);
   max-height: min(92vh, 36rem);
