@@ -1,4 +1,5 @@
-import { BODY_MAX_BYTES } from '../lib/constants'
+import { BODY_MAX_BYTES, BROWSE_MAX } from '../lib/constants'
+import { buildSearchPlan } from '../lib/search'
 import { parseMarkdownDoc } from '../lib/markdown'
 import { sha256Hex } from '../lib/hash'
 
@@ -23,6 +24,40 @@ export function isVisibleToOwner(
   owner: string,
 ): boolean {
   return row.owner === owner && row.deleted_at == null
+}
+
+export async function searchDocs(
+  db: D1Database,
+  owner: string,
+  q: string,
+  limit: number = BROWSE_MAX,
+): Promise<DocRow[]> {
+  const plan = buildSearchPlan(q)
+  if (plan.mode === 'fts') {
+    const result = await db
+      .prepare(
+        `SELECT d.* FROM docs_fts f
+         JOIN docs d ON d.id = f.doc_id
+         WHERE f.owner = ? AND docs_fts MATCH ?
+           AND d.deleted_at IS NULL
+         ORDER BY rank
+         LIMIT ?`,
+      )
+      .bind(owner, plan.binds[0], limit)
+      .all<DocRow>()
+    return result.results ?? []
+  }
+  const pattern = plan.binds[0]
+  const result = await db
+    .prepare(
+      `SELECT * FROM docs
+       WHERE owner = ? AND deleted_at IS NULL
+         AND (title LIKE ? OR description LIKE ? OR body_md LIKE ?)
+       LIMIT ?`,
+    )
+    .bind(owner, pattern, pattern, pattern, limit)
+    .all<DocRow>()
+  return result.results ?? []
 }
 
 export async function getDocForOwner(
