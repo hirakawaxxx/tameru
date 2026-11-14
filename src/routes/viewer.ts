@@ -1,4 +1,4 @@
-import { Hono } from 'hono'
+import { Hono, type Context } from 'hono'
 import type { Env } from '../env'
 import type { AuthVariables } from '../middleware/auth'
 import { requireAuth } from '../middleware/auth'
@@ -125,7 +125,18 @@ function docMain(): string {
 </article>`
 }
 
+const VIEWER_CSP =
+  "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; connect-src 'self'; img-src 'self' data:"
+
 const viewer = new Hono<{ Bindings: Env; Variables: AuthVariables }>()
+
+function viewerHtml(
+  c: Context<{ Bindings: Env; Variables: AuthVariables }>,
+  html: string,
+) {
+  c.header('Content-Security-Policy', VIEWER_CSP)
+  return c.html(html)
+}
 
 viewer.use('*', async (c, next) => {
   if (isPublicAssetPath(c.req.path)) {
@@ -136,12 +147,13 @@ viewer.use('*', async (c, next) => {
 })
 
 viewer.get('/disclaimer', (c) =>
-  c.html(renderShell({ title: '免責事項', page: 'disclaimer', main: disclaimerMain() })),
+  viewerHtml(c, renderShell({ title: '免責事項', page: 'disclaimer', main: disclaimerMain() })),
 )
 
 viewer.get('/d/:id', requireAuth, (c) => {
   const id = c.req.param('id')
-  return c.html(
+  return viewerHtml(
+    c,
     renderShell({
       title: '文書',
       page: 'doc',
@@ -152,7 +164,7 @@ viewer.get('/d/:id', requireAuth, (c) => {
 })
 
 viewer.get('/', requireAuth, (c) =>
-  c.html(renderShell({ title: 'ホーム', page: 'home', main: homeMain() })),
+  viewerHtml(c, renderShell({ title: 'ホーム', page: 'home', main: homeMain() })),
 )
 
 export default viewer

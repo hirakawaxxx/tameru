@@ -118,9 +118,10 @@ async function listKindDirs(
 async function listTagDirs(db: D1Database, owner: string, limit: number): Promise<BrowseDirItem[]> {
   const result = await db
     .prepare(
-      `SELECT DISTINCT tag FROM doc_tags
-       WHERE owner = ?
-       ORDER BY tag
+      `SELECT DISTINCT t.tag FROM doc_tags t
+       INNER JOIN docs d ON d.id = t.doc_id AND d.owner = t.owner
+       WHERE t.owner = ? AND d.deleted_at IS NULL
+       ORDER BY t.tag
        LIMIT ?`,
     )
     .bind(owner, limit)

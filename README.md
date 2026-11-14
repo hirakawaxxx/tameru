@@ -16,7 +16,7 @@ pnpm dev             # wrangler dev → http://localhost:8787
 
 ヘルスチェック: `GET http://localhost:8787/health` が `200 { "ok": true }`。
 
-ブラウザ・API・MCP はローカルでは **Cloudflare Access をバイパス**し、`Host: localhost` かつ `wrangler.jsonc` の `ACCESS_AUD` が空のとき、次のデバッグヘッダーで owner を差し替えます。
+ブラウザ・API・MCP はローカルでは **Cloudflare Access をバイパス**し、`Host: localhost` かつ `ACCESS_AUD` が未設定（本番は Dashboard のみ）のとき、次のデバッグヘッダーで owner を差し替えます。
 
 ```http
 X-Tameru-Debug-Owner: you@example.com
@@ -43,7 +43,7 @@ pnpm dev
 | `DB` | D1 バインディング（`database_name`: `tameru`） |
 | `ASSETS` | `public/` 静的アセット |
 | `ACCESS_TEAM_DOMAIN` | Access JWT 検証用チームドメイン |
-| `ACCESS_AUD` | Access アプリの AUD（本番は Dashboard のシークレット/vars。ローカルは空で可） |
+| `ACCESS_AUD` | Access アプリの AUD（本番のみ Dashboard のシークレット/vars。リポには載せない） |
 | `DISCLAIMER_VERSION` | 免責文の版。上げると再同意が必要 |
 
 本番の `ACCESS_AUD` などはリポジトリに載せず、Workers Builds の変数・シークレットで設定します（[docs/deploy.md](docs/deploy.md)）。

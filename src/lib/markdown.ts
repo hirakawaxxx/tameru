@@ -17,12 +17,20 @@ function firstH1(body: string): string | null {
   return m ? m[1].trim() : null
 }
 
-function normalizeTags(input: unknown): string[] {
+export function normalizeTags(input: unknown): string[] {
   if (!Array.isArray(input)) return []
-  return input
-    .map((t) => String(t).trim())
-    .filter(Boolean)
-    .slice(0, MAX_TAGS)
+  const seen = new Set<string>()
+  const tags: string[] = []
+  for (const item of input) {
+    const tag = String(item).trim()
+    if (!tag) continue
+    const key = tag.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    tags.push(tag)
+    if (tags.length >= MAX_TAGS) break
+  }
+  return tags
 }
 
 export function parseMarkdownDoc(raw: string): ParsedDoc {

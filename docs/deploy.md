@@ -11,7 +11,7 @@
 3. Connect GitHub → リポジトリ選択 → Production branch: `main`
 4. Build command: `pnpm install --frozen-lockfile && pnpm exec wrangler deploy`
    （または Dashboard の Build configuration: `pnpm install --frozen-lockfile` + Deploy: `pnpm exec wrangler deploy`）
-5. Build variables / secrets: `ACCESS_AUD`（本番 AUD）、API token は Dashboard 側（リポに置かない）
+5. Build variables / secrets: **`ACCESS_AUD`**（本番の Access Application AUD）を Workers の **vars またはシークレット**として Dashboard で設定する。リポの `wrangler.jsonc` には載せない（空文字も置かない）。API token も Dashboard 側のみ。
 6. **Preview deployments: Disabled**（v1・Access 無し URL を出さない）
 7. `workers.dev` は wrangler.jsonc で `false` — カスタムドメインのみ
 8. D1 migrate: 本番反映は merge 前または Build の Deploy command 先頭で
@@ -24,8 +24,9 @@
 - [ ] Zero Trust → Access → Applications → Add `tameru`
 - [ ] Domain: `tameru.hirakawaxxx.com`（全体、Bypass パスなし）
 - [ ] Policy: Allow — メール `...@...`（owner ポリシー）
-- [ ] Application AUD をコピー → Workers シークレット/vars `ACCESS_AUD`
-- [ ] `ACCESS_TEAM_DOMAIN=hirakawaxxx.cloudflareaccess.com`
+- [ ] Application AUD をコピー → Workers シークレット/vars `ACCESS_AUD`（Dashboard のみ）
+- [ ] `ACCESS_TEAM_DOMAIN=hirakawaxxx.cloudflareaccess.com`（`wrangler.jsonc` の vars で可）
+- [ ] Service Token / Service Auth 利用時: JWT の `email` が Service Token 名になり得る — owner ポリシーはメール許可リストと整合させる
 
 ## MCP Portal
 
