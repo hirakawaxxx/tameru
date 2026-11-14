@@ -40,7 +40,11 @@ async function acceptDisclaimer({ statusEl, acceptBtn, scrollEl } = {}) {
   }
   if (acceptBtn) acceptBtn.disabled = true
   try {
-    const res = await fetch('/api/me/disclaimer', { method: 'POST' })
+    const res = await fetch('/api/me/disclaimer', {
+      method: 'POST',
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+    })
     if (!res.ok) {
       let msg = '同意の記録に失敗しました。しばらくしてから再度お試しください。'
       try {
@@ -56,7 +60,10 @@ async function acceptDisclaimer({ statusEl, acceptBtn, scrollEl } = {}) {
       if (acceptBtn && scrollEl) syncDisclaimerAcceptButton(scrollEl, acceptBtn)
       return
     }
-    location.reload()
+    // Hide gate immediately so a cached /api/me cannot flash the interstitial again.
+    const gate = document.getElementById('disclaimer-gate')
+    if (gate) gate.hidden = true
+    location.assign(`/?view=${encodeURIComponent(preferredView())}&_=${Date.now()}`)
   } catch {
     if (statusEl) {
       statusEl.textContent = 'ネットワークエラーで同意できませんでした。'
@@ -95,10 +102,16 @@ async function initDisclaimerGate() {
   if (page === 'disclaimer') return
 
   try {
-    const res = await fetch('/api/me')
+    const res = await fetch('/api/me', {
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+    })
     if (!res.ok) return
     const me = await res.json()
-    if (me.disclaimer_accepted) return
+    if (me.disclaimer_accepted) {
+      if (gate) gate.hidden = true
+      return
+    }
     if (gate) gate.hidden = false
     if (scrollEl) {
       requestAnimationFrame(() => {

@@ -27,6 +27,7 @@ api.use('*', requireAuth)
 api.get('/me', async (c) => {
   const owner = c.get('owner')
   const user = await ensureUser(c.env.DB, owner)
+  c.header('Cache-Control', 'no-store')
   return c.json({
     owner: user.owner,
     disclaimer_accepted: disclaimerAccepted(user, c.env.DISCLAIMER_VERSION),
@@ -38,6 +39,7 @@ api.post('/me/disclaimer', async (c) => {
   const owner = c.get('owner')
   await ensureUser(c.env.DB, owner)
   await acceptDisclaimer(c.env.DB, owner, c.env.DISCLAIMER_VERSION)
+  c.header('Cache-Control', 'no-store')
   return c.json({ ok: true })
 })
 
