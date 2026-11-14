@@ -18,3 +18,28 @@
    `pnpm migrate:remote`（Build トークンに D1 Edit 権限）
 
 初回セットアップ後、`main` への merge が Build をトリガーすることを Dashboard で確認してください（手動・一回）。
+
+## Cloudflare Access（ブラウザ + Worker 全体）
+
+- [ ] Zero Trust → Access → Applications → Add `tameru`
+- [ ] Domain: `tameru.hirakawaxxx.com`（全体、Bypass パスなし）
+- [ ] Policy: Allow — メール `...@...`（owner ポリシー）
+- [ ] Application AUD をコピー → Workers シークレット/vars `ACCESS_AUD`
+- [ ] `ACCESS_TEAM_DOMAIN=hirakawaxxx.cloudflareaccess.com`
+
+## MCP Portal
+
+- [ ] Access controls → MCP Portals → MCP server
+  - URL: `https://tameru.hirakawaxxx.com/mcp`
+  - 認証: Service Auth（`CF-Access-Client-Id` / `CF-Access-Client-Secret`）
+  - Policy: owner（ログインユーザーに紐づく）
+- [ ] Portal ホスト例: `tameru-mcp.hirakawaxxx.com` → 上記 server を登録
+- [ ] クライアント登録 URL: `https://tameru-mcp.hirakawaxxx.com/mcp`
+- [ ] Service Token 用 Service Auth ポリシーを `tameru` Access アプリに追加
+
+## ローカル MCP
+
+```bash
+claude mcp add --transport http tameru http://localhost:8787/mcp
+# ヘッダー: X-Tameru-Debug-Owner: you@example.com
+```

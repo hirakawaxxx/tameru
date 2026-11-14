@@ -22,7 +22,7 @@ node ../design-kit/bin/design-kit.mjs check
 ## 開発メモ
 
 - ローカル: `wrangler dev` とローカル D1
-- 本番デプロイ: GitHub の `main` を Cloudflare Workers Builds に連携（日常の本番 ship は `wrangler deploy` に依存しない）
+- 本番デプロイ・Access・MCP: [docs/deploy.md](docs/deploy.md)（Workers Builds、Cloudflare Access、MCP Portal）
 - ブランチ戦略・PR ルール: [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ### 初回のみ（Cloudflare D1）
