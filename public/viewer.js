@@ -249,7 +249,7 @@ async function initDoc() {
       <h1 class="ui-text-display">${escapeHtml(d.title || d.id)}</h1>
       <p class="ui-text-caption ui-text-muted">${escapeHtml(d.kind || '')} · 更新 ${formatDate(d.updated_at)}</p>
       ${d.description ? `<p class="ui-text-body">${escapeHtml(d.description)}</p>` : ''}
-      <pre class="doc-body ui-text-body">${escapeHtml(d.body || '')}</pre>
+      <div class="doc-body ui-text-body">${d.body_html ?? ''}</div>
       ${links ? `<section><h2 class="ui-text-heading">リンク</h2><ul>${links}</ul></section>` : ''}
       ${backlinks ? `<section><h2 class="ui-text-heading">バックリンク</h2><ul>${backlinks}</ul></section>` : ''}`
   } catch {

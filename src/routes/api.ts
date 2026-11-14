@@ -17,6 +17,7 @@ import type { AuthVariables } from '../middleware/auth'
 import { requireAuth } from '../middleware/auth'
 import { requireDisclaimer } from '../middleware/disclaimer'
 import { BROWSE_MAX } from '../lib/constants'
+import { renderMarkdownToHtml } from '../lib/render-md'
 
 const api = new Hono<{ Bindings: Env; Variables: AuthVariables }>()
 
@@ -77,6 +78,7 @@ api.get('/docs/:id', async (c) => {
     created_at: row.created_at,
     updated_at: row.updated_at,
     body: row.body_md,
+    body_html: renderMarkdownToHtml(row.body_md),
     links,
     backlinks,
   })
