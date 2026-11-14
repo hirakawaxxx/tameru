@@ -8,6 +8,7 @@ import {
   type DocRow,
 } from '../../db/docs'
 import { BROWSE_MAX } from '../../lib/constants'
+import { ERROR_CODES, mcpErrorJson } from '../../lib/http-errors'
 import { registerBrowseTool } from './browse'
 
 export const MCP_TOOL_NAMES = [
@@ -63,10 +64,10 @@ export function registerTools(server: McpServer, ctx: McpToolContext): void {
     async ({ id, markdown }) => {
       const result = await upsertDoc(ctx.db, ctx.owner, { id, markdown })
       if (result.status === 'too_large') {
-        return textJson({ error: 'too_large', status: 413 })
+        return textJson(mcpErrorJson(ERROR_CODES.too_large))
       }
       if (result.status === 'not_found') {
-        return textJson({ error: 'not_found', status: 404 })
+        return textJson(mcpErrorJson(ERROR_CODES.not_found))
       }
       return textJson(result)
     },
@@ -111,7 +112,7 @@ export function registerTools(server: McpServer, ctx: McpToolContext): void {
     },
     async ({ id, offset = 0, max_chars }) => {
       const row = await getDocForOwner(ctx.db, ctx.owner, id)
-      if (!row) return textJson({ error: 'not_found', status: 404 })
+      if (!row) return textJson(mcpErrorJson(ERROR_CODES.not_found))
       const body =
         max_chars != null ? row.body_md.slice(offset, offset + max_chars) : row.body_md.slice(offset)
       const links = JSON.parse(row.links_json) as string[]
@@ -144,7 +145,7 @@ export function registerTools(server: McpServer, ctx: McpToolContext): void {
     },
     async ({ id }) => {
       const ok = await softDeleteDoc(ctx.db, ctx.owner, id)
-      if (!ok) return textJson({ error: 'not_found', status: 404 })
+      if (!ok) return textJson(mcpErrorJson(ERROR_CODES.not_found))
       return textJson({ ok: true, id })
     },
   )

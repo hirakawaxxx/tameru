@@ -1,6 +1,7 @@
 import { createMiddleware } from 'hono/factory'
 import type { Env } from '../env'
 import { ownerFromDevHeaders, verifyAccessJwt } from '../lib/access'
+import { ERROR_CODES, jsonApiError } from '../lib/http-errors'
 
 export type AuthVariables = { owner: string }
 
@@ -19,10 +20,10 @@ export const requireAuth = createMiddleware<{
     return next()
   }
   if (!c.env.ACCESS_AUD) {
-    return c.json({ error: 'unauthorized' }, 401)
+    return jsonApiError(c, ERROR_CODES.unauthorized)
   }
   const jwt = c.req.header('Cf-Access-Jwt-Assertion')
-  if (!jwt) return c.json({ error: 'unauthorized' }, 401)
+  if (!jwt) return jsonApiError(c, ERROR_CODES.unauthorized)
   try {
     const owner = await verifyAccessJwt(
       jwt,
@@ -32,6 +33,6 @@ export const requireAuth = createMiddleware<{
     c.set('owner', owner)
     await next()
   } catch {
-    return c.json({ error: 'unauthorized' }, 401)
+    return jsonApiError(c, ERROR_CODES.unauthorized)
   }
 })

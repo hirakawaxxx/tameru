@@ -17,6 +17,7 @@ import type { AuthVariables } from '../middleware/auth'
 import { requireAuth } from '../middleware/auth'
 import { requireDisclaimer } from '../middleware/disclaimer'
 import { BROWSE_MAX } from '../lib/constants'
+import { ERROR_CODES, jsonApiError } from '../lib/http-errors'
 import { renderMarkdownToHtml } from '../lib/render-md'
 
 const api = new Hono<{ Bindings: Env; Variables: AuthVariables }>()
@@ -66,7 +67,7 @@ api.get('/docs/:id', async (c) => {
   const owner = c.get('owner')
   const id = c.req.param('id')
   const row = await getDocForOwner(c.env.DB, owner, id)
-  if (!row) return c.json({ error: 'not_found' }, 404)
+  if (!row) return jsonApiError(c, ERROR_CODES.not_found)
   const links = JSON.parse(row.links_json) as string[]
   const backlinks = await listBacklinks(c.env.DB, owner, id)
   return c.json({
