@@ -61,6 +61,12 @@ body {
   white-space: nowrap;
 }
 
+/* Icon-only tabs: selection is the raised background, not the kit checkmark. */
+.viewer-toolbar .ui-segmented__item:is([aria-selected="true"], [aria-pressed="true"])::before {
+  content: none;
+  display: none;
+}
+
 .viewer-view-icon {
   display: block;
 }
