@@ -22,7 +22,7 @@ function isPublicAssetPath(pathname: string): boolean {
 
 function renderShell(options: {
   title: string
-  page: 'home' | 'doc' | 'disclaimer'
+  page: 'home' | 'doc' | 'disclaimer' | 'help'
   docId?: string
   main: string
 }): string {
@@ -51,6 +51,7 @@ function renderShell(options: {
       ${options.main}
     </main>
     <footer class="viewer-footer ui-text-caption">
+      <a href="/help">使い方</a>
       <a href="/disclaimer">免責事項</a>
     </footer>
   </div>
@@ -82,23 +83,27 @@ function disclaimerMain(): string {
 </article>`
 }
 
+const LIST_VIEW_ICON = `<svg class="viewer-view-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/></svg>`
+
+const GRAPH_VIEW_ICON = `<svg class="viewer-view-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><line x1="7" y1="6" x2="13" y2="10"/><line x1="13" y1="10" x2="7" y2="14"/><circle cx="7" cy="6" r="2.5" fill="currentColor" stroke="none"/><circle cx="13" cy="10" r="2.5" fill="currentColor" stroke="none"/><circle cx="7" cy="14" r="2.5" fill="currentColor" stroke="none"/></svg>`
+
 function homeMain(): string {
   return `<div class="viewer-home">
   <div class="viewer-toolbar">
     <div class="ui-segmented" role="tablist" aria-label="表示切替">
-      <button type="button" class="ui-segmented__item" data-view="list" role="tab" aria-selected="true">リスト</button>
-      <button type="button" class="ui-segmented__item" data-view="graph" role="tab" aria-selected="false">グラフ</button>
+      <button type="button" class="ui-segmented__item" data-view="list" role="tab" aria-selected="false" aria-label="リスト" title="リスト">${LIST_VIEW_ICON}</button>
+      <button type="button" class="ui-segmented__item" data-view="graph" role="tab" aria-selected="true" aria-label="グラフ" title="グラフ">${GRAPH_VIEW_ICON}</button>
     </div>
     <label class="viewer-search">
       <span class="ui-visually-hidden">検索</span>
       <input type="search" id="search-input" class="ui-input" placeholder="検索…" autocomplete="off">
     </label>
   </div>
-  <section id="view-list" class="viewer-panel" role="tabpanel">
+  <section id="view-list" class="viewer-panel" role="tabpanel" hidden>
     <p id="list-status" class="ui-text-caption ui-text-muted">読み込み中…</p>
     <ul id="doc-list" class="viewer-doc-list"></ul>
   </section>
-  <section id="view-graph" class="viewer-panel" role="tabpanel" hidden>
+  <section id="view-graph" class="viewer-panel" role="tabpanel">
     <p id="graph-status" class="ui-text-caption ui-text-muted">読み込み中…</p>
     <div class="viewer-graph-wrap">
       <svg id="graph-svg" class="viewer-graph" aria-label="文書リンクのグラフ"></svg>
@@ -106,6 +111,30 @@ function homeMain(): string {
     </div>
   </section>
 </div>`
+}
+
+function helpMain(): string {
+  return `<article class="viewer-help">
+  <h1 class="ui-text-display">使い方</h1>
+  <div class="viewer-help__body ui-text-body">
+    <p>tameru は、コーディングエージェントが <strong>MCP</strong> で Markdown 文書をため、人が <strong>Viewer</strong>（このブラウザ画面）で読むためのナレッジベースです。</p>
+    <h2 class="ui-text-heading">ホーム画面</h2>
+    <p>初回表示は<strong>グラフ</strong>が既定です。ツールバーのアイコンで<strong>リスト</strong>（一覧・検索）に切り替えられます。前回の表示はブラウザに記憶されます（<code>?view=list</code> / <code>?view=graph</code> でも指定できます）。</p>
+    <h2 class="ui-text-heading">MCP ツール（書き込みの本線）</h2>
+    <ul>
+      <li><code>upsert_doc</code> — Markdown を作成・更新</li>
+      <li><code>browse</code> — 索引や文書ツリーを探索</li>
+      <li><code>search</code> — 全文検索</li>
+      <li><code>get_doc</code> — 1 件取得</li>
+      <li><code>delete_doc</code> — 論理削除</li>
+    </ul>
+    <h2 class="ui-text-heading">接続の目安</h2>
+    <p>MCP クライアントからは、デプロイ先と同じオリジンの <code>/mcp</code> エンドポイントに接続します（ローカル開発では <code>wrangler dev</code> の URL を使います）。機微情報や個人データは置かないでください。詳しくは <a href="/disclaimer">免責事項</a> をお読みください。</p>
+  </div>
+  <p class="viewer-help__actions">
+    <a href="/" class="ui-button ui-button--secondary">ホームへ</a>
+  </p>
+</article>`
 }
 
 function docMain(): string {
@@ -140,6 +169,10 @@ viewer.use('*', async (c, next) => {
 
 viewer.get('/disclaimer', (c) =>
   viewerHtml(c, renderShell({ title: '免責事項', page: 'disclaimer', main: disclaimerMain() })),
+)
+
+viewer.get('/help', (c) =>
+  viewerHtml(c, renderShell({ title: '使い方', page: 'help', main: helpMain() })),
 )
 
 viewer.get('/d/:id', requireAuth, (c) => {
