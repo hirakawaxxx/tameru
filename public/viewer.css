@@ -8,10 +8,19 @@ body {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  /* Reading-friendly on small screens; widen on desktop for the graph canvas. */
   max-width: 56rem;
+  width: 100%;
   margin: 0 auto;
   padding: var(--space-6) var(--space-4) var(--space-8);
   gap: var(--space-6);
+  box-sizing: border-box;
+}
+
+@media (min-width: 64rem) {
+  .viewer-shell {
+    max-width: min(90rem, calc(100vw - 2 * var(--space-6)));
+  }
 }
 
 .viewer-header {
@@ -179,6 +188,12 @@ body {
   background: var(--color-surface-raised);
   border-radius: var(--radius-lg);
   box-shadow: var(--elevation-1);
+}
+
+@media (min-width: 64rem) {
+  .viewer-graph {
+    height: min(75vh, 44rem);
+  }
 }
 
 .viewer-graph-panel {
