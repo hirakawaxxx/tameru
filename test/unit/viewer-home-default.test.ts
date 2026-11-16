@@ -20,13 +20,18 @@ describe('viewer home default and help', () => {
     expect(viewerTs).not.toMatch(/>\s*グラフ\s*<\/button>/)
   })
 
-  it('registers public /help route and footer link', () => {
+  it('registers public /help route and header nav links', () => {
     expect(viewerTs).toContain("viewer.get('/help'")
     const helpRouteLine = viewerTs.match(/viewer\.get\('\/help'.*$/m)?.[0] ?? ''
     expect(helpRouteLine).not.toContain('requireAuth')
+    expect(viewerTs).toContain('class="viewer-nav')
     expect(viewerTs).toContain('<a href="/help">使い方</a>')
+    expect(viewerTs).toContain('<a href="/disclaimer">免責事項</a>')
+    expect(viewerTs).toContain('viewer-brand__icon')
+    expect(viewerTs).toContain('src="/favicon.svg"')
     expect(viewerTs).toContain("page: 'help'")
     expect(viewerTs).toContain('function helpMain()')
+    expect(viewerTs).not.toContain('viewer-footer')
   })
 
   it('preferredView() falls back to graph', () => {
