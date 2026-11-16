@@ -7,7 +7,7 @@ function preferredView() {
   if (q === 'list' || q === 'graph') return q
   const stored = localStorage.getItem(VIEW_KEY)
   if (stored === 'list' || stored === 'graph') return stored
-  return 'list'
+  return 'graph'
 }
 
 function setView(view) {
@@ -26,6 +26,10 @@ function setView(view) {
   url.searchParams.set('view', view)
   history.replaceState(null, '', url)
   if (view === 'graph') loadGraph()
+  if (view === 'list') {
+    const search = document.getElementById('search-input')
+    void runSearch((search?.value ?? '').trim())
+  }
 }
 
 function syncDisclaimerAcceptButton(scrollEl, acceptBtn) {
@@ -99,7 +103,7 @@ async function initDisclaimerGate() {
     void acceptDisclaimer({ statusEl: statusPage, acceptBtn: acceptPage, scrollEl }),
   )
 
-  if (page === 'disclaimer') return
+  if (page === 'disclaimer' || page === 'help') return
 
   try {
     const res = await fetch('/api/me', {
@@ -189,7 +193,6 @@ function initHome() {
     searchTimer = setTimeout(() => void runSearch(q), 250)
   })
   setView(preferredView())
-  if (preferredView() === 'list') void runSearch('')
 }
 
 let graphLoaded = false
