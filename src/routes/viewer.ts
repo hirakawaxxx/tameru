@@ -44,16 +44,21 @@ function renderShell(options: {
 <body data-page="${options.page}"${docAttr}>
   <div class="viewer-shell">
     <header class="viewer-header">
-      <a href="/" class="viewer-brand ui-text-heading">tameru</a>
+      <div class="viewer-header__top">
+        <a href="/" class="viewer-brand ui-text-heading">
+          <img class="viewer-brand__icon" src="/favicon.svg" width="28" height="28" alt="" decoding="async">
+          <span class="viewer-brand__name">tameru</span>
+        </a>
+        <nav class="viewer-nav ui-text-caption" aria-label="サイト">
+          <a href="/help">使い方</a>
+          <a href="/disclaimer">免責事項</a>
+        </nav>
+      </div>
       <p class="viewer-lead ui-text-caption">エージェントがため、人がつながりを見る Markdown ナレッジ</p>
     </header>
     <main class="viewer-main">
       ${options.main}
     </main>
-    <footer class="viewer-footer ui-text-caption">
-      <a href="/help">使い方</a>
-      <a href="/disclaimer">免責事項</a>
-    </footer>
   </div>
   <div id="disclaimer-gate" class="viewer-gate" hidden>
     <div class="viewer-gate__panel ui-card">
